@@ -35,11 +35,12 @@
             box-sizing: border-box;
         }
 
-        .buttons{
+        .buttons {
             display: flex;
             gap: 10px;
         }
-        .buttons a{
+
+        .buttons a {
             text-decoration: none;
         }
 
@@ -91,6 +92,9 @@
         <span class="label">PS4 IP Address:</span>
         <input type="text" id="ps4ip" placeholder="e.g. 192.168.1.15" value="">
 
+        <span class="label">PS4 Port:</span>
+        <input type="text" id="ps4port" placeholder="e.g. 9090" value="">
+
         <span class="label">Select Payload (.bin):</span>
         <input type="file" id="fileInput" accept=".bin">
 
@@ -114,7 +118,9 @@
 
         async function uploadAndSend() {
             const ip = document.getElementById('ps4ip').value || window.location.hostname;
-            log(ip)
+            const port = document.getElementById('ps4port').value || "9090";
+            log("Target: " + ip + ":" + port);
+
             const fileElement = document.getElementById('fileInput');
             const file = fileElement.files[0];
 
@@ -125,11 +131,8 @@
 
             log("Step 1: Requesting Browser Permission...");
 
-            // We try to 'touch' the PS4 status port first.
-            // This helps bypass some 'Private Network' blocks by making 
-            // the browser think the user intended to visit this IP.
             try {
-                await fetch(`http://${ip}:9090/status`, { mode: 'no-cors' });
+                await fetch(`http://${ip}:${port}/status`, { mode: 'no-cors' });
             } catch (e) {
                 log("Permission hint sent (Ignoring error)...");
             }
@@ -140,45 +143,22 @@
                 log("Step 2: Sending Payload...");
 
                 const xhr = new XMLHttpRequest();
-                xhr.open("POST", `http://${ip}:9090`, true);
-
-                // IMPORTANT: We don't set any headers. 
-                // Adding headers triggers 'Preflight' (OPTIONS) requests 
-                // which GoldHEN will ignore, causing the whole thing to fail.
-
+                xhr.open("POST", `http://${ip}:${port}`, true);
                 xhr.send(rawData);
                 log("Sent! Check PS4 notification.");
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function sendToPS4(ip, data) {
-            log("Pushing to PS4 at " + ip + ":9090...");
-
-            const xhr = new XMLHttpRequest();
-            // Standard GoldHEN BinLoader port
-            xhr.open("POST", "http://" + ip + ":9090", true);
-
-            // We use the 'blind' send method. 
-            // Modern browsers will show a 'Network Error' because GoldHEN 
-            // doesn't send back the security headers (CORS) the phone expects.
-            xhr.send(data);
-
-            log("Payload sent!");
-            log("<span style='color:#888;'>Check PS4 for notification. If it fails, refresh the BinLoader on the console.</span>");
-        }
-
         function checkConnection() {
             const ip = document.getElementById('ps4ip').value;
+            const port = document.getElementById('ps4port').value || "9090";
             const img = new Image();
-            // We try to load a fake image from the PS4 port
-            img.src = `http://${ip}:9090/favicon.ico?${Date.now()}`;
+            img.src = `http://${ip}:${port}/favicon.ico?${Date.now()}`;
 
             log("Testing connection...");
 
             img.onerror = function () {
-                // In Mixed Content, the browser might still block the display, 
-                // but it 'pings' the IP, which can sometimes wake up the route.
                 log("Ping attempted. (Mixed content still restricts results)");
             };
         }

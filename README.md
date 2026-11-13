@@ -6,7 +6,7 @@ Why use it? This allows you to load payloads through GoldHEN's PayLoader on the 
 
 ## PS4 Websrv Setup
 ### Option 1: Online method
-1. Load the payload using [PSFree Enhanced](https://arabpixel.github.io/PSFree-Enhanced)
+1. Load the payload using [WebKitty](http://webkitty.arabpixel.net)
 
 - The payload will automatically create `/data/websrv` for you if its not already and will create a basic `index.html` file be able to load couple payloads.
 Thats it.
@@ -15,7 +15,7 @@ Thats it.
 1. Download [PS4-Websrv](https://github.com/ArabPixel/ps4-websrv/releases) from latest release.
 2. Put the payload inside `/data/payloads` using any FTP client or an exfat formatted USB and File Xplorer 2.0 by Lapy
 
-3. Open Payload Guest and click on ps4-websrv. That's it.
+3. Load ps4-websrv using Payload Guest/Webkit/HEN's Toolbox menu. And a notification will pop up.
 
 ## Usage
 You can access the web server by typing your PS4 Ip on any device that's connected to the same network. Clicking on the payloads will load them immediately on the PS4.
