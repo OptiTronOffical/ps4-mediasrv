@@ -12,7 +12,7 @@
 #endif
 
 #define SERVER_PORT   80
-#define WEB_ROOT      "/data/websrv"
+#define WEB_ROOT      "/data/websrv"  // Video library and served web assets
 #define BUFFER_SIZE   8192
 #define NET_POLL_SEC  3   // how often network monitor checks (seconds)
 #define MAX_CLIENTS   12  // max concurrent client threads; excess gets a 503

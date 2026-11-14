@@ -1,4 +1,4 @@
-#include "net.h"
+#include "net.h"\n#include <strings.h>
 
 const char *get_mime_type(const char *path) {
   const char *ext = strrchr(path, '.');
