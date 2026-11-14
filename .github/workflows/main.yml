@@ -1,0 +1,71 @@
+
+name: Build PS4 Video Web Server
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Compile PS4 Payload
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install build utilities
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xxd python3
+
+      - name: Repair malformed include directives
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          for name in ("source/http.c", "source/net.c"):
+              path = Path(name)
+              data = path.read_text()
+              data = data.replace(r"\n#include", "\n#include")
+              path.write_text(data)
+              print("Checked:", name)
+          PY
+
+      - name: Generate embedded web assets
+        run: |
+          mkdir -p assets
+          xxd -i index.html > assets/index.h
+          xxd -i loader.html > assets/loader.h
+
+      - name: Build using PS4 Payload SDK
+        uses: Scene-Collective/ps4-payload-sdk@v1
+        with:
+          app_path: .
+          build_command: make clean && make
+
+      - name: Verify payload
+        run: |
+          test -s ps4-websrv-video.bin
+          echo "Payload successfully generated"
+          ls -lh ps4-websrv-video.bin
+          file ps4-websrv-video.bin
+
+      - name: Upload compiled payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: PS4-Websrv-Video
+          path: |
+            ps4-websrv-video.bin
+            *.map
+          if-no-files-found: error
+          compression-level: 9
+          retention-days: 30
