@@ -15,57 +15,102 @@ permissions:
 
 jobs:
   build:
-    name: Compile PS4 Payload
+    name: Compile PS4 Video Server
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Install build utilities
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xxd python3
+          sudo apt-get install -y \
+            build-essential \
+            gcc \
+            binutils \
+            make \
+            xxd \
+            git
 
-      - name: Repair malformed include directives
+      - name: Clone PS4 Payload SDK
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
+          git clone --depth 1 \
+            https://github.com/Scene-Collective/ps4-payload-sdk.git \
+            "$RUNNER_TEMP/ps4-payload-sdk"
 
-          for name in ("source/http.c", "source/net.c"):
-              path = Path(name)
-              data = path.read_text()
-              data = data.replace(r"\n#include", "\n#include")
-              path.write_text(data)
-              print("Checked:", name)
-          PY
-
-      - name: Generate embedded web assets
+      - name: Build PS4 SDK
         run: |
-          mkdir -p assets
+          set -e
+
+          export PS4SDK="$RUNNER_TEMP/ps4-payload-sdk"
+
+          echo "Building PS4 Payload SDK..."
+          make -C "$PS4SDK/libPS4" -j2
+
+          echo "SDK build completed."
+
+          test -f "$PS4SDK/libPS4/include"
+          test -f "$PS4SDK/libPS4/linker.x"
+          test -f "$PS4SDK/libPS4/crt0.s"
+
+      - name: Prepare project
+        run: |
+          set -e
+
+          mkdir -p assets build
+
+          echo "Generating embedded web assets..."
+
           xxd -i index.html > assets/index.h
           xxd -i loader.html > assets/loader.h
 
-      - name: Build using PS4 Payload SDK
-        uses: Scene-Collective/ps4-payload-sdk@v1
-        with:
-          app_path: .
-          build_command: make clean && make
-
-      - name: Verify payload
+      - name: Compile payload
         run: |
-          test -s ps4-websrv-video.bin
-          echo "Payload successfully generated"
-          ls -lh ps4-websrv-video.bin
-          file ps4-websrv-video.bin
+          set -e
 
-      - name: Upload compiled payload
+          export PS4SDK="$RUNNER_TEMP/ps4-payload-sdk"
+
+          echo "=================================="
+          echo " PS4 VIDEO WEBSERVER BUILD"
+          echo "=================================="
+
+          make clean
+          make -j2
+
+          echo "=================================="
+          echo " BUILD COMPLETE"
+          echo "=================================="
+
+          ls -lh *.bin
+
+      - name: Verify output
+        run: |
+          set -e
+
+          BIN=$(find . -maxdepth 1 -type f -name '*.bin' | head -n 1)
+
+          if [ -z "$BIN" ]; then
+            echo "ERROR: Payload binary not found!"
+            exit 1
+          fi
+
+          if [ ! -s "$BIN" ]; then
+            echo "ERROR: Payload binary is empty!"
+            exit 1
+          fi
+
+          echo "Payload: $BIN"
+          echo "Size: $(stat -c%s "$BIN") bytes"
+
+          file "$BIN"
+
+      - name: Upload PS4 payload
         uses: actions/upload-artifact@v4
         with:
           name: PS4-Websrv-Video
           path: |
-            ps4-websrv-video.bin
+            *.bin
             *.map
           if-no-files-found: error
-          compression-level: 9
           retention-days: 30
