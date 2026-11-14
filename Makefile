@@ -15,7 +15,7 @@ OBJS	:= $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(CFILES)) $(patsubst $(SDIR)/%.s, 
 
 LIBS	:= -lPS4
 
-TARGET = $(shell basename "$(CURDIR)").bin
+TARGET = ps4-websrv-video.bin
 
 $(TARGET): $(ODIR) assets/index.h $(OBJS)
 	$(CC) $(LIBPS4)/crt0.s $(ODIR)/*.o -o temp.t $(CFLAGS) $(LFLAGS) $(LIBS)

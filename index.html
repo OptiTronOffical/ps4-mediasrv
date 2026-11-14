@@ -1,183 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PS4 Websrv - Yaaay</title>
-    <style>
-        :root {
-            --ps-blue: #003791;
-            --ps-light-blue: #0072ce;
-            --bg-dark: #0a0a0a;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --text-main: #e0e0e0;
-            --accent: #00d4ff;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at top right, var(--ps-blue), transparent 400px);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 600px;
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            text-align: center;
-        }
-
-        h1 {
-            color: #fff;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 2px solid var(--ps-light-blue);
-            display: inline-block;
-            padding-bottom: 10px;
-        }
-
-        p {
-            line-height: 1.6;
-            font-size: 1.1rem;
-            color: #bbb;
-        }
-
-        .path-hint {
-            background: rgba(0, 0, 0, 0.3);
-            color: var(--accent);
-            padding: 10px;
-            border-radius: 8px;
-            font-family: monospace;
-            border-left: 4px solid var(--accent);
-            margin: 20px 0;
-        }
-
-        .footer {
-            margin-top: 30px;
-            font-size: 0.9rem;
-            color: var(--ps-light-blue);
-            font-weight: bold;
-        }
-
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: var(--accent);
-            color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background-color 0.3s ease;
-        }
-
-        .button:hover {
-            background-color: #00b4ff;
-        }
-
-        .btn-kill {
-            background-color: #e91e63;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 10px;
-        }
-
-        .btn-kill:hover {
-            background-color: #c2185b;
-        }
-
-        .btn-notify {
-            background-color: #25e91e;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 10px;
-        }
-
-        .btn-notify:hover {
-            background-color: #18c237;
-        }
-    </style>
-</head>
-
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PS4 Media Server</title>
+<style>
+:root{color-scheme:dark;--bg:#090d16;--panel:#121a2a;--line:#26354d;--blue:#168cff;--muted:#9eacc2}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#142746,var(--bg) 55%);color:#edf4ff;font:15px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+header{padding:26px max(20px,calc((100% - 1100px)/2));border-bottom:1px solid var(--line);background:#080d16cc}
+h1{margin:0;font-size:clamp(24px,4vw,36px)}header p{margin:6px 0 0;color:var(--muted)}
+main{max-width:1100px;margin:28px auto;padding:0 18px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+button,.crumb{border:1px solid var(--line);background:var(--panel);color:#fff;padding:10px 14px;border-radius:9px;cursor:pointer}
+button.primary{background:var(--blue);border-color:var(--blue)}button:hover,.crumb:hover{filter:brightness(1.2)}
+#where{color:var(--muted);margin:10px 0 16px;overflow-wrap:anywhere}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.item{display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-height:76px;padding:14px;background:linear-gradient(145deg,#17243a,#101827);border:1px solid var(--line);border-radius:12px}
+.ico{font-size:25px}.name{font-weight:600;overflow-wrap:anywhere}.meta{font-size:12px;color:var(--muted);margin-top:4px}
+.player{display:none;background:#05080e;border:1px solid var(--line);padding:12px;border-radius:14px;margin:20px 0}
+video{width:100%;max-height:70vh;background:#000;border-radius:8px}.playerhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+#status{color:var(--muted);padding:22px;text-align:center;border:1px dashed var(--line);border-radius:12px}
+footer{max-width:1100px;margin:36px auto;padding:0 18px 28px;color:var(--muted);font-size:13px}
+</style></head>
 <body>
-
-    <div class="container">
-        <h1>PS4 Web Server</h1>
-
-        <p>Your local server is successfully running.</p>
-
-        <div class="path-hint">
-            /data/websrv
-        </div>
-
-        <p>Custom files placed in the directory above will appear here. Which means its possible to put
-            your host files such as <strong>WebKitty</strong> and it will work immediately.</p>
-        <p>Visit this website on any device to send payloads to the console on the fly.</p>
-        <a class="button" href="loader.html">Try the Payload Sender</a>
-        <button class="button btn-kill" onclick="shutdownServer()">Shut Down Server</button>
-        <button class="button btn-notify" onclick="notify()">Test Notification</button>
-        <div class="footer">
-            Made by ArabPixel
-        </div>
-    </div>
-
-    <script>
-        function shutdownServer() {
-            if (!confirm("Are you sure you want to stop the web server? You will need to re-inject the payload to start it again.")) return;
-
-            fetch('/shutdown')
-                .then(() => {
-                    document.body.innerHTML = `
-                        <div class="container">
-                            <h1>Server Stopped</h1>
-                            <p>The web server has been shut down successfully.</p>
-                            <p>You can now close this browser window.</p>
-                        </div>
-                    `;
-                })
-                .catch(err => {
-                    alert("Server stopped? (connection lost).");
-                    window.location.reload();
-                });
-        }
-        function notify() {
-            const param = encodeURIComponent(detectPlatform());
-            fetch('/notify?msg=Hello World from ' + param)
-                .then(() => {
-                    alert("Notification sent!");
-                })
-                .catch(err => {
-                    alert("Notification failed? (connection lost).");
-                });
-        }
-
-        function detectPlatform() {
-            const ua = navigator.userAgent;
-            
-            if      (/PlayStation/i.test(ua)) return 'PS4';
-            else if (/Android/i.test(ua))     return 'Android';
-            else if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
-            else if (/Macintosh/i.test(ua))   return 'MacOS';
-            else if (/Windows/i.test(ua))     return 'Windows';
-            else if (/Linux/i.test(ua))       return 'Linux';
-            else                              return 'Unknown';
-        }
-    </script>
-
-</body>
-
-</html>
+<header><h1>▶ PS4 Media Server</h1><p>Stream videos stored on your PlayStation to devices on your local network.</p></header>
+<main>
+<div class="toolbar"><button class="primary" onclick="loadFolder(current)">↻ Refresh</button><button onclick="goRoot()">⌂ Media library</button><button onclick="closePlayer()">Close player</button></div>
+<div id="where">/data/websrv</div>
+<section class="player" id="player"><div class="playerhead"><strong id="playing">Now playing</strong><button onclick="closePlayer()">✕ Close</button></div><video id="video" controls playsinline preload="metadata"></video></section>
+<div id="status">Loading media library…</div><div class="grid" id="items"></div>
+</main><footer>Files are read directly from <code>/data/websrv</code>. Keep this page open while streaming. Playback format support depends on your browser/device.</footer>
+<script>
+let current="";
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmt(n){if(!n)return "";let u=["B","KB","MB","GB","TB"],i=0;while(n>=1024&&i<u.length-1){n/=1024;i++;}return n.toFixed(i?1:0)+" "+u[i];}
+function urlPath(s){return s.split("/").map(encodeURIComponent).join("/");}
+async function loadFolder(path=""){
+ current=path;$("where").textContent="/data/websrv"+(path?"/"+path:"");$("items").innerHTML="";$("status").style.display="block";$("status").textContent="Scanning folder…";
+ try{
+  const r=await fetch("/api/list?path="+encodeURIComponent(path),{cache:"no-store"});if(!r.ok)throw Error("HTTP "+r.status);
+  const data=await r.json();$("status").style.display="none";
+  if(path){const b=document.createElement("button");b.className="crumb";b.textContent="← Parent folder";b.onclick=()=>loadFolder(path.includes("/")?path.slice(0,path.lastIndexOf("/")):"");$("items").appendChild(b);}
+  data.items.sort((a,b)=>(a.dir===b.dir? a.name.localeCompare(b.name):a.dir?-1:1));
+  if(!data.items.length&& !path){$("status").style.display="block";$("status").textContent="No video files found. Copy videos into /data/websrv (subfolders are supported).";}
+  for(const item of data.items){
+   const b=document.createElement("button");b.className="item";
+   b.innerHTML='<span class="ico">'+(item.dir?'📁':'🎬')+'</span><span><span class="name">'+esc(item.name)+'</span><div class="meta">'+(item.dir?'Folder':fmt(item.size))+'</div></span>';
+   b.onclick=()=>item.dir?loadFolder(path?path+"/"+item.name:item.name):play(path?path+"/"+item.name:item.name);
+   $("items").appendChild(b);
+  }
+ }catch(e){$("status").style.display="block";$("status").textContent="Unable to read this folder: "+e.message;}
+}
+function play(rel){const v=$("video");v.pause();v.src="/"+urlPath(rel);$("playing").textContent=rel;$("player").style.display="block";v.load();v.play().catch(()=>{});$("player").scrollIntoView({behavior:"smooth",block:"start"});}
+function closePlayer(){const v=$("video");v.pause();v.removeAttribute("src");v.load();$("player").style.display="none";}
+function goRoot(){loadFolder("");}
+loadFolder("");
+</script></body></html>

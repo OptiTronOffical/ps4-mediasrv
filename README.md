@@ -1,38 +1,74 @@
-# PS4-Websrv
+# PS4 Video Web Server
 
-PS4 Websrv is a basic local HTTP server which hosts a website on the PS4. Website files hosted on `/data/websrv`.
+A video-library variant of PS4-Websrv. It serves video files from the PS4's
+`/data/websrv` directory to phones, tablets, PCs and smart TVs on the same LAN.
 
-Why use it? This allows you to load payloads through GoldHEN's PayLoader on the fly using any external device such as your phone or PC.
+## Features
 
-## PS4 Websrv Setup
-### Option 1: Online method
-1. Load the payload using [WebKitty](http://webkitty.arabpixel.net)
+- Browser-based media library with folder navigation and refresh.
+- Streams video directly from the PS4 filesystem; files are not copied or loaded
+  into memory in their entirety.
+- HTTP `Range` / `206 Partial Content` support, `Content-Range`, and
+  `Accept-Ranges: bytes` for seeking, scrubbing and resuming playback.
+- `HEAD` support and correct MIME types for common video formats.
+- Nested folders supported; directory listings show video files and folders.
+- Path traversal and symlink escape protection for served files.
+- Retains the original payload's PS4 network startup, IP notification,
+  instance replacement and shutdown behavior.
 
-- The payload will automatically create `/data/websrv` for you if its not already and will create a basic `index.html` file be able to load couple payloads.
-Thats it.
+## Install and use
 
-### Option 2: Payload guest
-1. Download [PS4-Websrv](https://github.com/ArabPixel/ps4-websrv/releases) from latest release.
-2. Put the payload inside `/data/payloads` using any FTP client or an exfat formatted USB and File Xplorer 2.0 by Lapy
+1. Build `ps4-websrv-video.bin` using the PS4 Payload SDK (see below).
+2. Load the payload on the PS4 using your usual payload loader.
+3. Copy videos into `/data/websrv`. Subfolders are supported, for example:
 
-3. Load ps4-websrv using Payload Guest/Webkit/HEN's Toolbox menu. And a notification will pop up.
+   ```
+   /data/websrv/
+     index.html
+     Movies/
+       film.mp4
+       clip.webm
+     TV/
+       episode.mp4
+   ```
 
-## Usage
-You can access the web server by typing your PS4 Ip on any device that's connected to the same network. Clicking on the payloads will load them immediately on the PS4.
+4. On a device connected to the same local network, open
+   `http://PS4-IP/` (port 80).
+5. Select a folder or video. Use the browser's normal playback controls to
+   pause, seek, change volume or enter fullscreen.
 
-- Since this is a HTTP server, this can be repurposed to anything web related and not just loading payloads.
-- To change the design or core logic, drop your files inside `/data/websrv/`.
+The payload creates `/data/websrv` and installs its embedded media-library
+`index.html` if no index file already exists. Existing files are preserved.
+If an older custom `index.html` is already present, back it up and replace it
+with the supplied `index.html` to use the new media browser.
 
-## How to compile
-1. Setup [ps4-payload-sdk](https://github.com/Scene-Collective/ps4-payload-sdk/) if you didn't already.
+## Supported formats
 
-2. Clone the repo and make
-```bash
-git clone https://github.com/ArabPixel/ps4-websrv
-cd ps4-websrv && make
+The server sends MIME types for MP4/M4V, WebM, Matroska (MKV), QuickTime MOV,
+AVI, MPEG and transport-stream files. Actual playback depends on the receiving
+device's browser and codec support. MP4 with H.264 video and AAC audio is the
+most broadly compatible choice. Unsupported formats may still be downloadable
+or playable in a compatible third-party player.
+
+## Build
+
+Install and configure [ps4-payload-sdk](https://github.com/Scene-Collective/ps4-payload-sdk/),
+then run:
+
+```sh
+make
 ```
-ps4-websrv.bin will be compiled in the same directory.
 
-## Notices
-- AI was used when making this payload to speedup the proccess.
-- The payload is provided 'as is' and without a guarantee that'll work.
+The output is `ps4-websrv-video.bin`. The build expects `PS4SDK` to point to the
+SDK directory, as in the original project.
+
+## Notes
+
+- This is a local-network HTTP server, not an internet-facing or authenticated
+  media service. Use it only on a trusted LAN; anyone who can reach the PS4
+  server can request files under `/data/websrv`.
+- Port 80 must be available on the PS4.
+- Large files are streamed in chunks. Playback performance depends on Wi-Fi,
+  storage speed, PS4 load and the receiving device.
+- The server remains capped at the original 12 concurrent client connections.
+- The existing `/shutdown` endpoint remains available to stop the server.
